@@ -9,3 +9,7 @@ app = Flask(__name__)
 def hello_world():
     return 'Hello from thermax!'
 
+from app import app
+#write all configureation from here
+if __name__ == '__main__':
+    app.run()
