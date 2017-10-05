@@ -1,10 +1,15 @@
 #views.py
 
-from flask import render_template,session ,redirect,request,url_for
+from flask import render_template,flash,session ,redirect,request,url_for
+from werkzeug.utils import secure_filename
+#from flask_mail import Mail,Message
 import mysql.connector
 from app import app
 import MySQLdb
-
+import os
+#upload folder where we extract data and working on time
+Upload_Folder ='/home/rsingh/mysite/backup/'
+app.config['UPLOAD_FOLDER'] = Upload_Folder
 #set secret key
 app.secret_key = 'A9756BCD'
 #create connection between mysql and python
@@ -78,3 +83,48 @@ def login():
 def logout():
     session.pop('userName',None)
     return redirect(url_for('index'))
+
+#check that upload function work here or
+@app.route('/upload',methods=['GET','POST'])
+def upload():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file upload')
+            return "so main problem is hjere"
+            return render_template("upload.html")
+        else:
+            f = request.files['file']
+            fileName = secure_filename(f.filename)
+            #return "File is here",filename
+            #f.save(secure_filename(f.filename))
+            f.save(os.path.join(app.config['UPLOAD_FOLDER'],fileName))
+            #fp = open(os.path.join(app.config['UPLOAD_FOLDER'],fileName),"rb")
+            sql = "insert into fileData(file,type,file_name) values (?,?,?)"
+            try:
+                curr.execute(sql,[LOAD_FILE(fileName),'json',fileName])
+                db.commit()
+                return "file Submmitted successfully"
+            except Exception:
+                return "file Not submitted into db :"
+    return render_template("upload.html")
+#insert the method related to test
+#show when the user final start test then this function is going to work its mainly use to serve the page
+#online
+
+@app.route('/test',methods=['GET','POST'])
+def test():
+    curr.execute("select * from testSet")
+    rows = curr.fetchall()
+    return render_template('test.html',rows=rows)
+    #request for login without login send user to signup page
+    return "welcome to the test page"
+
+
+#this page show the content of the different test and also show that some number of detail about that 
+#each time you got new question may be repated
+
+
+
+
+
+#this function is going to start test subject wise
